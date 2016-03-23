@@ -19,9 +19,21 @@ module.exports = function(grunt) {
 				src: concatList,
 				dest: "cometd-all.js"
 			}
+		},
+		umd: {
+			cometd: {
+				options: {
+					src: "cometd-all.js",
+					dest: "cometd-all-umd.js",
+					objectToExport: "org.cometd",
+					amdModuleId: 'cometd',
+					globalAlias: 'cometd'
+				}
+			}
 		}
 	});
 
     grunt.loadNpmTasks("grunt-contrib-concat");
-    grunt.registerTask("build", ["concat"]);
+    grunt.loadNpmTasks("grunt-umd");
+    grunt.registerTask("build", ["concat:cometd", "umd:cometd"]);
 };
