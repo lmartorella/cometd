@@ -12,3 +12,4 @@ overlays/
 *.prj
 .idea
 /node_modules
+/cometd-all-concat.js
