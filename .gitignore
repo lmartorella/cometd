@@ -11,3 +11,7 @@ overlays/
 *.ipr
 *.prj
 .idea
+/node_modules
+/cometd-all-concat.js
+/dist/temp
+/package-lock.json
