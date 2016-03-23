@@ -1,0 +1,1 @@
+{  "name": "cometd",  "description": "Welcome to the [CometD](http://cometd.org) Project, a scalable comet (server push) implementation for the web.",  "main": "cometd-all.js",  "authors": [    "lmartorella <lmartorella@iontrading.com>"  ],  "license": "MIT",  "homepage": "https://github.com/lmartorella/cometd",  "moduleType": [    "globals"  ],  "private": true}
