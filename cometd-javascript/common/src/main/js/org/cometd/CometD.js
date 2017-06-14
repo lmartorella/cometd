@@ -27,6 +27,7 @@ org.cometd.CometD = function(name) {
     var _transports = new org.cometd.TransportRegistry();
     var _transport;
     var _status = 'disconnected';
+    var _wasConnectedOnce = false;
     var _messageId = 0;
     var _clientId = null;
     var _batch = 0;
@@ -263,6 +264,9 @@ org.cometd.CometD = function(name) {
         if (_status !== newStatus) {
             _cometd._debug('Status', _status, '->', newStatus);
             _status = newStatus;
+            if (_status === 'connected') {
+                _wasConnectedOnce = true;
+            }
         }
     }
 
@@ -760,7 +764,8 @@ org.cometd.CometD = function(name) {
 
         // Only try again if we haven't been disconnected and
         // the advice permits us to retry the handshake
-        var retry = !_isDisconnected() && _advice.reconnect !== 'none';
+        // Fix: if never connected (still handshaking) use retry!
+        var retry = (!_isDisconnected() || !_wasConnectedOnce) && _advice.reconnect !== 'none';
         if (retry) {
             _increaseBackoff();
             _delayedHandshake();
