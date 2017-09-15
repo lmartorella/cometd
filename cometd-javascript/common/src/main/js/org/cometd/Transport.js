@@ -72,7 +72,7 @@ org.cometd.Transport = function() {
         if (response instanceof Object) {
             return [response];
         }
-        throw 'Conversion Error ' + response + ', typeof ' + (typeof response);
+        throw new Error('Conversion Error ' + response + ', typeof ' + (typeof response));
     };
 
     /**
@@ -83,7 +83,7 @@ org.cometd.Transport = function() {
      * false otherwise
      */
     this.accept = function(version, crossDomain, url) {
-        throw 'Abstract';
+        throw new Error('Abstract');
     };
 
     /**
@@ -95,7 +95,7 @@ org.cometd.Transport = function() {
     };
 
     this.send = function(envelope, metaConnect) {
-        throw 'Abstract';
+        throw new Error('Abstract');
     };
 
     this.reset = function() {

@@ -9,7 +9,7 @@ org.cometd.LongPollingTransport = function() {
     };
 
     _self.xhrSend = function(packet) {
-        throw 'Abstract';
+        throw new Error('Abstract');
     };
 
     _self.transportSend = function(envelope, request) {
@@ -39,11 +39,11 @@ org.cometd.LongPollingTransport = function() {
                             self.transportSuccess(envelope, request, received);
                         }
                     } catch (x) {
-                        self._debug(x);
+                        self._debug(x.message || x);
                         if (!success) {
                             _supportsCrossDomain = false;
                             var failure = {
-                                exception: x
+                                exception: x.message || x
                             };
                             failure.httpCode = self.xhrStatus(request.xhr);
                             self.transportFailure(envelope, request, failure);
@@ -74,7 +74,7 @@ org.cometd.LongPollingTransport = function() {
             // Keep the semantic of calling response callbacks asynchronously after the request
             this.setTimeout(function() {
                 self.transportFailure(envelope, request, {
-                    exception: x
+                    exception: x.message || x
                 });
             }, 0);
         }

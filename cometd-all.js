@@ -221,7 +221,7 @@ org.cometd.CometD = function(name) {
 
         var url = _cometd.getURL();
         if (!url) {
-            throw 'Missing required configuration parameter \'url\' specifying the Bayeux server URL';
+            throw new Error('Missing required configuration parameter \'url\' specifying the Bayeux server URL');
         }
 
         // Check if we're cross domain
@@ -307,14 +307,14 @@ org.cometd.CometD = function(name) {
         } catch (x) {
             var handler = _cometd.onExtensionException;
             if (_isFunction(handler)) {
-                _cometd._debug('Invoking extension exception handler', name, x);
+                _cometd._debug('Invoking extension exception handler', name, x.message || x);
                 try {
-                    handler.call(_cometd, x, name, outgoing, message);
+                    handler.call(_cometd, x.message || x, name, outgoing, message);
                 } catch (xx) {
-                    _cometd._info('Exception during execution of extension exception handler', name, xx);
+                    _cometd._info('Exception during execution of extension exception handler', name, xx.message || xx);
                 }
             } else {
-                _cometd._info('Exception during execution of extension', name, x);
+                _cometd._info('Exception during execution of extension', name, x.message || x);
             }
             return message;
         }
@@ -365,14 +365,14 @@ org.cometd.CometD = function(name) {
                     } catch (x) {
                         var handler = _cometd.onListenerException;
                         if (_isFunction(handler)) {
-                            _cometd._debug('Invoking listener exception handler', subscription, x);
+                            _cometd._debug('Invoking listener exception handler', subscription, x.message || x);
                             try {
-                                handler.call(_cometd, x, subscription, subscription.listener, message);
+                                handler.call(_cometd, x.message || x, subscription, subscription.listener, message);
                             } catch (xx) {
-                                _cometd._info('Exception during execution of listener exception handler', subscription, xx);
+                                _cometd._info('Exception during execution of listener exception handler', subscription, xx.message || xx);
                             }
                         } else {
-                            _cometd._info('Exception during execution of listener', subscription, message, x);
+                            _cometd._info('Exception during execution of listener', subscription, message, x.message || x);
                         }
                     }
                 }
@@ -472,7 +472,7 @@ org.cometd.CometD = function(name) {
                 try {
                     _handleMessages.call(_cometd, rcvdMessages);
                 } catch (x) {
-                    _cometd._info('Exception during handling of messages', x);
+                    _cometd._info('Exception during handling of messages', x.message || x);
                 }
             },
             onFailure: function(conduit, messages, failure) {
@@ -481,7 +481,7 @@ org.cometd.CometD = function(name) {
                     failure.connectionType = transport ? transport.getType() : "unknown";
                     _handleFailure.call(_cometd, conduit, messages, failure);
                 } catch (x) {
-                    _cometd._info('Exception during handling of failure', x);
+                    _cometd._info('Exception during handling of failure', x.message || x);
                 }
             }
         };
@@ -543,7 +543,7 @@ org.cometd.CometD = function(name) {
         --_batch;
         _cometd._debug('Ending batch, depth', _batch);
         if (_batch < 0) {
-            throw 'Calls to startBatch() and endBatch() are not paired';
+            throw new Error('Calls to startBatch() and endBatch() are not paired');
         }
 
         if (_batch === 0 && !_isDisconnected() && !_internalBatch) {
@@ -619,7 +619,7 @@ org.cometd.CometD = function(name) {
             try {
                 handler.call(_cometd, failure, oldTransport, newTransport);
             } catch (x) {
-                _cometd._info('Exception during execution of transport exception handler', x);
+                _cometd._info('Exception during execution of transport exception handler', x.message || x);
             }
         }
     }
@@ -695,7 +695,7 @@ org.cometd.CometD = function(name) {
             if (!_transport) {
                 var failure = 'Could not find initial transport among: ' + _transports.getTransportTypes();
                 _cometd._warn(failure);
-                throw failure;
+                throw new Error(failure);
             }
         }
 
@@ -727,14 +727,14 @@ org.cometd.CometD = function(name) {
         } catch (x) {
             var handler = _cometd.onCallbackException;
             if (_isFunction(handler)) {
-                _cometd._debug('Invoking callback exception handler', x);
+                _cometd._debug('Invoking callback exception handler', x.message || x);
                 try {
-                    handler.call(_cometd, x, message);
+                    handler.call(_cometd, x.message || x, message);
                 } catch (xx) {
-                    _cometd._info('Exception during execution of callback exception handler', xx);
+                    _cometd._info('Exception during execution of callback exception handler', xx.message || xx);
                 }
             } else {
-                _cometd._info('Exception during execution of message callback', x);
+                _cometd._info('Exception during execution of message callback', x.message || x);
             }
         }
     }
@@ -845,7 +845,7 @@ org.cometd.CometD = function(name) {
                     _disconnect(true);
                     break;
                 default:
-                    throw 'Unrecognized advice action ' + action;
+                    throw new Error('Unrecognized advice action ' + action);
             }
         } else {
             _failHandshake(message);
@@ -896,7 +896,7 @@ org.cometd.CometD = function(name) {
                 _disconnect(true);
                 break;
             default:
-                throw 'Unrecognized advice action' + action;
+                throw new Error('Unrecognized advice action' + action);
         }
     }
 
@@ -921,7 +921,7 @@ org.cometd.CometD = function(name) {
                     _disconnect(false);
                     break;
                 default:
-                    throw 'Unrecognized advice action ' + action;
+                    throw new Error('Unrecognized advice action ' + action);
             }
         } else {
             _failConnect(message);
@@ -1143,14 +1143,14 @@ org.cometd.CometD = function(name) {
         } else {
             if (_isString(callback)) {
                 if (!scope) {
-                    throw 'Invalid scope ' + scope;
+                    throw new Error('Invalid scope ' + scope);
                 }
                 delegate.method = scope[callback];
                 if (!_isFunction(delegate.method)) {
-                    throw 'Invalid callback ' + callback + ' for scope ' + scope;
+                    throw new Error('Invalid callback ' + callback + ' for scope ' + scope);
                 }
             } else if (!_isFunction(callback)) {
-                throw 'Invalid callback ' + callback;
+                throw new Error('Invalid callback ' + callback);
             }
         }
         return delegate;
@@ -1361,7 +1361,7 @@ org.cometd.CometD = function(name) {
             delegate.method.call(delegate.scope);
             this.endBatch();
         } catch (x) {
-            this._info('Exception during execution of batch', x);
+            this._info('Exception during execution of batch', x.message || x);
             this.endBatch();
             throw x;
         }
@@ -1378,10 +1378,10 @@ org.cometd.CometD = function(name) {
      */
     this.addListener = function(channel, scope, callback) {
         if (arguments.length < 2) {
-            throw 'Illegal arguments number: required 2, got ' + arguments.length;
+            throw new Error('Illegal arguments number: required 2, got ' + arguments.length);
         }
         if (!_isString(channel)) {
-            throw 'Illegal argument type: channel must be a string';
+            throw new Error('Illegal argument type: channel must be a string');
         }
 
         return _addListener(channel, scope, callback, true);
@@ -1395,7 +1395,7 @@ org.cometd.CometD = function(name) {
     this.removeListener = function(subscription) {
         // Beware of subscription.id == 0, which is falsy => cannot use !subscription.id
         if (!subscription || !subscription.channel || !("id" in subscription)) {
-            throw 'Invalid argument: expected subscription, not ' + subscription;
+            throw new Error('Invalid argument: expected subscription, not ' + subscription);
         }
 
         _removeListener(subscription);
@@ -1421,13 +1421,13 @@ org.cometd.CometD = function(name) {
      */
     this.subscribe = function(channel, scope, callback, subscribeProps, subscribeCallback) {
         if (arguments.length < 2) {
-            throw 'Illegal arguments number: required 2, got ' + arguments.length;
+            throw new Error('Illegal arguments number: required 2, got ' + arguments.length);
         }
         if (!_isString(channel)) {
-            throw 'Illegal argument type: channel must be a string';
+            throw new Error('Illegal argument type: channel must be a string');
         }
         if (_isDisconnected()) {
-            throw 'Illegal state: already disconnected';
+            throw new Error('Illegal state: already disconnected');
         }
 
         // Normalize arguments
@@ -1476,10 +1476,10 @@ org.cometd.CometD = function(name) {
      */
     this.unsubscribe = function(subscription, unsubscribeProps, unsubscribeCallback) {
         if (arguments.length < 1) {
-            throw 'Illegal arguments number: required 1, got ' + arguments.length;
+            throw new Error('Illegal arguments number: required 1, got ' + arguments.length);
         }
         if (_isDisconnected()) {
-            throw 'Illegal state: already disconnected';
+            throw new Error('Illegal state: already disconnected');
         }
 
         if (_isFunction(unsubscribeProps)) {
@@ -1534,16 +1534,16 @@ org.cometd.CometD = function(name) {
      */
     this.publish = function(channel, content, publishProps, publishCallback) {
         if (arguments.length < 1) {
-            throw 'Illegal arguments number: required 1, got ' + arguments.length;
+            throw new Error('Illegal arguments number: required 1, got ' + arguments.length);
         }
         if (!_isString(channel)) {
-            throw 'Illegal argument type: channel must be a string';
+            throw new Error('Illegal argument type: channel must be a string');
         }
         if (/^\/meta\//.test(channel)) {
-            throw 'Illegal argument: cannot publish to meta channels';
+            throw new Error('Illegal argument: cannot publish to meta channels');
         }
         if (_isDisconnected()) {
-            throw 'Illegal state: already disconnected';
+            throw new Error('Illegal state: already disconnected');
         }
 
         if (_isFunction(content)) {
@@ -1570,13 +1570,13 @@ org.cometd.CometD = function(name) {
 
     this.remoteCall = function(target, content, timeout, callback) {
         if (arguments.length < 1) {
-            throw 'Illegal arguments number: required 1, got ' + arguments.length;
+            throw new Error('Illegal arguments number: required 1, got ' + arguments.length);
         }
         if (!_isString(target)) {
-            throw 'Illegal argument type: target must be a string';
+            throw new Error('Illegal argument type: target must be a string');
         }
         if (_isDisconnected()) {
-            throw 'Illegal state: already disconnected';
+            throw new Error('Illegal state: already disconnected');
         }
 
         if (_isFunction(content)) {
@@ -1589,7 +1589,7 @@ org.cometd.CometD = function(name) {
         }
 
         if (typeof timeout !== 'number') {
-            throw 'Illegal argument type: timeout must be a number';
+            throw new Error('Illegal argument type: timeout must be a number');
         }
 
         if (!target.match(/^\//)) {
@@ -1696,10 +1696,10 @@ org.cometd.CometD = function(name) {
      */
     this.registerExtension = function(name, extension) {
         if (arguments.length < 2) {
-            throw 'Illegal arguments number: required 2, got ' + arguments.length;
+            throw new Error('Illegal arguments number: required 2, got ' + arguments.length);
         }
         if (!_isString(name)) {
-            throw 'Illegal argument type: extension name must be a string';
+            throw new Error('Illegal argument type: extension name must be a string');
         }
 
         var existing = false;
@@ -1737,7 +1737,7 @@ org.cometd.CometD = function(name) {
      */
     this.unregisterExtension = function(name) {
         if (!_isString(name)) {
-            throw 'Illegal argument type: extension name must be a string';
+            throw new Error('Illegal argument type: extension name must be a string');
         }
 
         var unregistered = false;
@@ -1893,7 +1893,7 @@ org.cometd.Transport = function() {
         if (response instanceof Object) {
             return [response];
         }
-        throw 'Conversion Error ' + response + ', typeof ' + (typeof response);
+        throw new Error('Conversion Error ' + response + ', typeof ' + (typeof response));
     };
 
     /**
@@ -1904,7 +1904,7 @@ org.cometd.Transport = function() {
      * false otherwise
      */
     this.accept = function(version, crossDomain, url) {
-        throw 'Abstract';
+        throw new Error('Abstract');
     };
 
     /**
@@ -1916,7 +1916,7 @@ org.cometd.Transport = function() {
     };
 
     this.send = function(envelope, metaConnect) {
-        throw 'Abstract';
+        throw new Error('Abstract');
     };
 
     this.reset = function() {
@@ -1949,7 +1949,7 @@ org.cometd.CallbackPollingTransport = function() {
     };
 
     _self.jsonpSend = function(packet) {
-        throw 'Abstract';
+        throw new Error('Abstract');
     };
 
     function _failTransportFn(envelope, request, x) {
@@ -2038,10 +2038,10 @@ org.cometd.CallbackPollingTransport = function() {
                             self.transportSuccess(envelopeToSend, request, received);
                         }
                     } catch (x) {
-                        self._debug(x);
+                        self._debug(x.message || x);
                         if (!success) {
                             self.transportFailure(envelopeToSend, request, {
-                                exception: x
+                                exception: x.message || x
                             });
                         }
                     }
@@ -2066,7 +2066,7 @@ org.cometd.CallbackPollingTransport = function() {
             // Keep the semantic of calling response callbacks asynchronously after the request
             this.setTimeout(function() {
                 self.transportFailure(envelopeToSend, request, {
-                    exception: xx
+                    exception: xx.message || xx
                 });
             }, 0);
         }
@@ -2158,7 +2158,7 @@ org.cometd.RequestTransport = function() {
         var requestId = request.id;
         this._debug('Transport', this.getType(), 'metaConnect complete, request', requestId);
         if (_metaConnectRequest !== null && _metaConnectRequest.id !== requestId) {
-            throw 'Longpoll request mismatch, completing request ' + requestId;
+            throw new Error('Longpoll request mismatch, completing request ' + requestId);
         }
 
         // Reset metaConnect request
@@ -2213,7 +2213,7 @@ org.cometd.RequestTransport = function() {
      * @param request the request information
      */
     _self.transportSend = function(envelope, request) {
-        throw 'Abstract';
+        throw new Error('Abstract');
     };
 
     _self.transportSuccess = function(envelope, request, responses) {
@@ -2240,7 +2240,7 @@ org.cometd.RequestTransport = function() {
 
     function _metaConnectSend(envelope) {
         if (_metaConnectRequest !== null) {
-            throw 'Concurrent metaConnect requests not allowed, request id=' + _metaConnectRequest.id + ' not yet completed';
+            throw new Error('Concurrent metaConnect requests not allowed, request id=' + _metaConnectRequest.id + ' not yet completed');
         }
 
         var requestId = ++_requestIds;
@@ -2296,7 +2296,7 @@ org.cometd.RequestTransport = function() {
                 xhr.abort();
                 return state !== XMLHttpRequest.UNSENT;
             } catch (x) {
-                this._debug(x);
+                this._debug(x.message || x);
             }
         }
         return false;
@@ -2307,7 +2307,7 @@ org.cometd.RequestTransport = function() {
             try {
                 return xhr.status;
             } catch (x) {
-                this._debug(x);
+                this._debug(x.message || x);
             }
         }
         return -1;
@@ -2327,7 +2327,7 @@ org.cometd.LongPollingTransport = function() {
     };
 
     _self.xhrSend = function(packet) {
-        throw 'Abstract';
+        throw new Error('Abstract');
     };
 
     _self.transportSend = function(envelope, request) {
@@ -2357,11 +2357,11 @@ org.cometd.LongPollingTransport = function() {
                             self.transportSuccess(envelope, request, received);
                         }
                     } catch (x) {
-                        self._debug(x);
+                        self._debug(x.message || x);
                         if (!success) {
                             _supportsCrossDomain = false;
                             var failure = {
-                                exception: x
+                                exception: x.message || x
                             };
                             failure.httpCode = self.xhrStatus(request.xhr);
                             self.transportFailure(envelope, request, failure);
@@ -2392,7 +2392,7 @@ org.cometd.LongPollingTransport = function() {
             // Keep the semantic of calling response callbacks asynchronously after the request
             this.setTimeout(function() {
                 self.transportFailure(envelope, request, {
-                    exception: x
+                    exception: x.message || x
                 });
             }, 0);
         }
@@ -2568,7 +2568,7 @@ org.cometd.WebSocketTransport = function() {
             _connecting = context;
         } catch (x) {
             _webSocketSupported = false;
-            this._debug('Exception while creating WebSocket object', x);
+            this._debug('Exception while creating WebSocket object', x.message || x);
             throw x;
         }
 
@@ -2693,7 +2693,7 @@ org.cometd.WebSocketTransport = function() {
                 _forceClose.call(self, context, {
                     code: 1000,
                     reason: 'Exception',
-                    exception: x
+                    exception: x.message || x
                 });
             }, 0);
         }
@@ -2845,7 +2845,7 @@ org.cometd.WebSocketTransport = function() {
                 context.webSocket.close(code, reason);
             }
         } catch (x) {
-            this._debug(x);
+            this._debug(x.message || x);
         }
     };
 
@@ -2895,7 +2895,7 @@ org.cometd.Utils.setTimeout = function(cometd, funktion, delay) {
             cometd._debug('Invoking timed function', funktion);
             funktion();
         } catch (x) {
-            cometd._debug('Exception invoking timed function', funktion, x);
+            cometd._debug('Exception invoking timed function', funktion, x.message || x);
         }
     }, delay);
 };

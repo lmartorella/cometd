@@ -35,7 +35,7 @@ org.cometd.Utils.setTimeout = function(cometd, funktion, delay) {
             cometd._debug('Invoking timed function', funktion);
             funktion();
         } catch (x) {
-            cometd._debug('Exception invoking timed function', funktion, x);
+            cometd._debug('Exception invoking timed function', funktion, x.message || x);
         }
     }, delay);
 };

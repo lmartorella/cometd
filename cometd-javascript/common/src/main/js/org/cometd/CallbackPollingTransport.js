@@ -7,7 +7,7 @@ org.cometd.CallbackPollingTransport = function() {
     };
 
     _self.jsonpSend = function(packet) {
-        throw 'Abstract';
+        throw new Error('Abstract');
     };
 
     function _failTransportFn(envelope, request, x) {
@@ -96,10 +96,10 @@ org.cometd.CallbackPollingTransport = function() {
                             self.transportSuccess(envelopeToSend, request, received);
                         }
                     } catch (x) {
-                        self._debug(x);
+                        self._debug(x.message || x);
                         if (!success) {
                             self.transportFailure(envelopeToSend, request, {
-                                exception: x
+                                exception: x.message || x
                             });
                         }
                     }
@@ -124,7 +124,7 @@ org.cometd.CallbackPollingTransport = function() {
             // Keep the semantic of calling response callbacks asynchronously after the request
             this.setTimeout(function() {
                 self.transportFailure(envelopeToSend, request, {
-                    exception: xx
+                    exception: xx.message || xx
                 });
             }, 0);
         }

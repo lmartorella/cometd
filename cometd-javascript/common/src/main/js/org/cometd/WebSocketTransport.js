@@ -69,7 +69,7 @@ org.cometd.WebSocketTransport = function() {
             _connecting = context;
         } catch (x) {
             _webSocketSupported = false;
-            this._debug('Exception while creating WebSocket object', x);
+            this._debug('Exception while creating WebSocket object', x.message || x);
             throw x;
         }
 
@@ -194,7 +194,7 @@ org.cometd.WebSocketTransport = function() {
                 _forceClose.call(self, context, {
                     code: 1000,
                     reason: 'Exception',
-                    exception: x
+                    exception: x.message || x
                 });
             }, 0);
         }
@@ -346,7 +346,7 @@ org.cometd.WebSocketTransport = function() {
                 context.webSocket.close(code, reason);
             }
         } catch (x) {
-            this._debug(x);
+            this._debug(x.message || x);
         }
     };
 

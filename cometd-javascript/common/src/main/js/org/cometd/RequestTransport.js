@@ -81,7 +81,7 @@ org.cometd.RequestTransport = function() {
         var requestId = request.id;
         this._debug('Transport', this.getType(), 'metaConnect complete, request', requestId);
         if (_metaConnectRequest !== null && _metaConnectRequest.id !== requestId) {
-            throw 'Longpoll request mismatch, completing request ' + requestId;
+            throw new Error('Longpoll request mismatch, completing request ' + requestId);
         }
 
         // Reset metaConnect request
@@ -136,7 +136,7 @@ org.cometd.RequestTransport = function() {
      * @param request the request information
      */
     _self.transportSend = function(envelope, request) {
-        throw 'Abstract';
+        throw new Error('Abstract');
     };
 
     _self.transportSuccess = function(envelope, request, responses) {
@@ -163,7 +163,7 @@ org.cometd.RequestTransport = function() {
 
     function _metaConnectSend(envelope) {
         if (_metaConnectRequest !== null) {
-            throw 'Concurrent metaConnect requests not allowed, request id=' + _metaConnectRequest.id + ' not yet completed';
+            throw new Error('Concurrent metaConnect requests not allowed, request id=' + _metaConnectRequest.id + ' not yet completed');
         }
 
         var requestId = ++_requestIds;
@@ -219,7 +219,7 @@ org.cometd.RequestTransport = function() {
                 xhr.abort();
                 return state !== XMLHttpRequest.UNSENT;
             } catch (x) {
-                this._debug(x);
+                this._debug(x.message || x);
             }
         }
         return false;
@@ -230,7 +230,7 @@ org.cometd.RequestTransport = function() {
             try {
                 return xhr.status;
             } catch (x) {
-                this._debug(x);
+                this._debug(x.message || x);
             }
         }
         return -1;
