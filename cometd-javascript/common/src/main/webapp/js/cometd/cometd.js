@@ -963,6 +963,9 @@
             context.webSocket.send(json);
             this._debug('Transport', this.getType(), 'sent', envelope, 'metaConnect =', metaConnect);
 
+            // Use string length (UTF-8) as an approximation
+            this.onStat({ tx: json.length });
+
             // Manage the timeout waiting for the response.
             var maxDelay = this.getConfiguration().maxNetworkDelay;
             var delay = maxDelay;
@@ -1041,6 +1044,9 @@
 
         _self.onMessage = function(context, wsMessage) {
             this._debug('Transport', this.getType(), 'received websocket message', wsMessage, context);
+
+            // Use string length (UTF-8) as an approximation
+            this.onStat({ rx: (wsMessage.data && wsMessage.data.length) || 0 });
 
             var close = false;
             var messages = this.convertToMessages(wsMessage.data);
@@ -1177,6 +1183,13 @@
             _super.abort();
             _forceClose.call(this, _context, {code: 1000, reason: 'Abort'});
             this.reset(true);
+        };
+
+        /**
+         * Track down web-socket events (data sent/received).
+         * event: { tx: number, rx: number };
+         */
+        _self.onStat = function(event) {
         };
 
         return _self;
