@@ -2,7 +2,7 @@
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module unless amdModuleId is set
     define('cometd', [], function () {
-      return (root['window.org.cometd'] = factory());
+      return (root['org.cometd'] = factory());
     });
   } else if (typeof module === 'object' && module.exports) {
     // Node. Does not work with strict CommonJS, but
@@ -18,10 +18,10 @@
 // The extensions cannot be simply concatenated since they use a non-standard AMD usage (multiple def)
 
 // Disable AMD internally
-var org = org || {};
-org.cometd = org.cometd || {};
 var define = undefined;
 
+// Disable CommonJS internally as well (for Node.JS usage)
+var exports = undefined;
 
 /*
  * Copyright (c) 2008-2018 the original author or authors.
@@ -54,6 +54,10 @@ var define = undefined;
         root.org.cometd = factory();
     }
 }(this, function() {
+
+    // Uses setTimeout, clearTimeout, XMLHttpRequest, WebSocket, console, location.
+    var global = typeof window !== 'undefined' ? window : { };
+
     /**
      * Utility functions.
      */
@@ -85,7 +89,7 @@ var define = undefined;
             return -1;
         },
         setTimeout: function(cometd, funktion, delay) {
-            return window.setTimeout(function() {
+            return global.setTimeout(function() {
                 try {
                     cometd._debug('Invoking timed function', funktion);
                     funktion();
@@ -95,7 +99,7 @@ var define = undefined;
             }, delay);
         },
         clearTimeout: function(timeoutHandle) {
-            window.clearTimeout(timeoutHandle);
+            global.clearTimeout(timeoutHandle);
         }
     };
 
@@ -544,7 +548,7 @@ var define = undefined;
                 try {
                     var state = xhr.readyState;
                     xhr.abort();
-                    return state !== window.XMLHttpRequest.UNSENT;
+                    return state !== global.XMLHttpRequest.UNSENT;
                 } catch (x) {
                     this._debug(x);
                 }
@@ -578,7 +582,7 @@ var define = undefined;
         };
 
         _self.newXMLHttpRequest = function() {
-            return new window.XMLHttpRequest();
+            return new global.XMLHttpRequest();
         };
 
         _self.xhrSend = function(packet) {
@@ -701,9 +705,9 @@ var define = undefined;
             var script = document.createElement('script');
 
             var callbackName = '_cometd_jsonp_' + jsonp++;
-            window[callbackName] = function(responseText) {
+            global[callbackName] = function(responseText) {
                 head.removeChild(script);
-                delete window[callbackName];
+                delete global[callbackName];
                 packet.onSuccess(responseText);
             };
 
@@ -913,7 +917,7 @@ var define = undefined;
 
             try {
                 var protocol = _cometd.getConfiguration().protocol;
-                context.webSocket = protocol ? new window.WebSocket(url, protocol) : new window.WebSocket(url);
+                context.webSocket = protocol ? new global.WebSocket(url, protocol) : new global.WebSocket(url);
                 _connecting = context;
             } catch (x) {
                 _webSocketSupported = false;
@@ -1186,7 +1190,7 @@ var define = undefined;
         _self.accept = function(version, crossDomain, url) {
             this._debug('Transport', this.getType(), 'accept, supported:', _webSocketSupported);
             // Using !! to return a boolean (and not the WebSocket object).
-            return _webSocketSupported && !!window.WebSocket && _cometd.websocketEnabled !== false;
+            return _webSocketSupported && !!global.WebSocket && _cometd.websocketEnabled !== false;
         };
 
         _self.send = function(envelope, metaConnect) {
@@ -1226,7 +1230,7 @@ var define = undefined;
      * The default name is the string 'default'.
      * @param name the optional name of this cometd object
      */
-    var CometD = function (name) {
+    var CometD = function (name, opts) {
         var _cometd = this;
         var _name = name || 'default';
         var _crossDomain = false;
@@ -1252,6 +1256,9 @@ var define = undefined;
         var _connected = false;
         var _unconnectTime = 0;
         var _handshakeMessages = 0;
+        if (opts && opts.glob !== 'undefined') {
+            global = opts.glob;
+        }
         var _config = {
             protocol: null,
             stickyReconnect: true,
@@ -1354,13 +1361,13 @@ var define = undefined;
         }
 
         function _log(level, args) {
-            if (window.console) {
-                var logger = window.console[level];
+            if (global.console) {
+                var logger = global.console[level];
                 if (_isFunction(logger)) {
                     var now = new Date();
                     [].splice.call(args, 0, 0, _zeroPad(now.getHours(), 2) + ':' + _zeroPad(now.getMinutes(), 2) + ':' +
                         _zeroPad(now.getSeconds(), 2) + '.' + _zeroPad(now.getMilliseconds(), 3));
-                    logger.apply(window.console, args);
+                    logger.apply(global.console, args);
                 }
             }
         }
@@ -1404,9 +1411,9 @@ var define = undefined;
          * @return whether the given hostAndPort is cross domain
          */
         this._isCrossDomain = function(hostAndPort) {
-            if (window.location && window.location.host) {
+            if (global.location && global.location.host) {
                 if (hostAndPort) {
-                    return hostAndPort !== window.location.host;
+                    return hostAndPort !== global.location.host;
                 }
             }
             return false;
@@ -3219,12 +3226,14 @@ var define = undefined;
             return this._mixin(true, {}, _advice);
         };
 
-        // Initialize transports.
-        if (window.WebSocket) {
-            this.registerTransport('websocket', new WebSocketTransport());
+        if (!opts || !opts.noDefaultTransports) {
+            // Initialize default transports.
+            if (global.WebSocket) {
+                this.registerTransport('websocket', new WebSocketTransport());
+            }
+            this.registerTransport('long-polling', new LongPollingTransport());
+            this.registerTransport('callback-polling', new CallbackPollingTransport());
         }
-        this.registerTransport('long-polling', new LongPollingTransport());
-        this.registerTransport('callback-polling', new CallbackPollingTransport());
     };
 
     var _z85EncodeTable = [
@@ -3692,6 +3701,6 @@ var define = undefined;
     }
 }));
 
-return window.org.cometd;
+return org.cometd;
 
 }));

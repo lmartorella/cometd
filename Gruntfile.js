@@ -20,7 +20,7 @@ module.exports = function(grunt) {
 				options: {
 					src: "dist/temp/cometd-all-concat.js",
 					dest: "dist/cometd-all.js",
-					objectToExport: "window.org.cometd",
+					objectToExport: "org.cometd",
 					amdModuleId: 'cometd',
 					globalAlias: 'cometd'
 				}
