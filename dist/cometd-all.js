@@ -2607,6 +2607,7 @@ var exports = undefined;
          */
         this.disconnect = function(sync, disconnectProps, disconnectCallback) {
             if (_isDisconnected()) {
+                disconnectCallback && disconnectCallback();
                 return;
             }
 
