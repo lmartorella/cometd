@@ -1979,11 +1979,13 @@
                     if (!failureInfo.transport) {
                         var failure = 'Could not negotiate transport, client=[' + transportTypes + '], server=[' + message.supportedConnectionTypes + ']';
                         this._warn(failure);
-                        _notifyTransportException(_transport.getType(), null, {
-                            reason: failure,
-                            connectionType: _transport.getType(),
-                            transport: _transport
-                        });
+                        if (_transport) {
+                            _notifyTransportException(_transport.getType(), null, {
+                                reason: failure,
+                                connectionType: _transport.getType(),
+                                transport: _transport
+                            });
+                        }
                     }
                 }
             } else {
@@ -1995,11 +1997,15 @@
                         var newTransport = transports.negotiateTransport(transportTypes, version, crossDomain, url);
                         if (!newTransport) {
                             this._warn('Could not negotiate transport, client=[' + transportTypes + ']');
-                            _notifyTransportException(_transport.getType(), null, message.failure);
+                            if (_transport) {
+                                _notifyTransportException(_transport.getType(), null, message.failure);
+                            }
                             failureInfo.action = 'none';
-                        } else {
-                            this._debug('Transport', _transport.getType(), '->', newTransport.getType());
-                            _notifyTransportException(_transport.getType(), newTransport.getType(), message.failure);
+                        } else {                            
+                            if (_transport) {
+                                this._debug('Transport', _transport.getType(), '->', newTransport.getType());
+                                _notifyTransportException(_transport.getType(), newTransport.getType(), message.failure);
+                            }
                             failureInfo.action = 'handshake';
                             failureInfo.transport = newTransport;
                         }
