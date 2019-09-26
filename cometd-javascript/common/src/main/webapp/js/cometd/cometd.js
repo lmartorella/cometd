@@ -830,7 +830,7 @@
         // By default WebSocket is supported
         var _webSocketSupported = true;
         // Whether we were able to establish a WebSocket connection
-        var _webSocketConnected = false;
+        _self.webSocketConnected = false;
         var _stickyReconnect = true;
         // The context contains the envelopes that have been sent
         // and the timeouts for the messages that have been sent.
@@ -843,7 +843,7 @@
             _super.reset(init);
             _webSocketSupported = true;
             if (init) {
-                _webSocketConnected = false;
+                _self.webSocketConnected = false;
             }
             _stickyReconnect = true;
             _context = null;
@@ -922,7 +922,7 @@
                 if (_sameContext(context)) {
                     _connecting = null;
                     _context = context;
-                    _webSocketConnected = true;
+                    _self.webSocketConnected = true;
                     self.onOpen(context);
                 } else {
                     // We have a valid connection already, close this one.
@@ -1123,7 +1123,7 @@
                 // Remember if we were able to connect.
                 // This close event could be due to server shutdown,
                 // and if it restarts we want to try websocket again.
-                _webSocketSupported = _stickyReconnect && _webSocketConnected;
+                _webSocketSupported = _stickyReconnect && _self.webSocketConnected;
                 _connecting = null;
                 _context = null;
             }
