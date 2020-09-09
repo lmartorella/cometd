@@ -37,6 +37,7 @@ import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
 import org.cometd.bayeux.server.ServerMessage.Mutable;
+import org.cometd.server.DefaultSecurityPolicy;
 import org.cometd.server.authorizer.GrantAuthorizer;
 import org.cometd.server.filter.DataFilter;
 import org.cometd.server.filter.DataFilterMessageListener;
@@ -54,6 +55,19 @@ public class ChatService {
     @PostConstruct
     public void init() {
         _bayeux.addExtension(new SlowExtension());
+        _bayeux.setSecurityPolicy(new DefaultSecurityPolicy() {
+            @Override
+            public boolean canCreate(BayeuxServer server, ServerSession session, String channelId,
+                    ServerMessage message) {
+                return true;
+            }
+
+            @Override
+            public boolean canPublish(BayeuxServer server, ServerSession session, ServerChannel channel,
+                    ServerMessage message) {
+                return true;
+            }
+        });
     }
 
     @Configure({"/chat/**", "/members/**"})

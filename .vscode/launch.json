@@ -1,0 +1,70 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Demo<cometd-demo>",
+            "request": "launch",
+            "mainClass": "org.cometd.demo.Demo",
+            "projectName": "cometd-demo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-CometDApplication<cometd-documentation>",
+            "request": "launch",
+            "mainClass": "org.cometd.documentation.server.CometDApplication",
+            "projectName": "cometd-documentation"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-CometDLoadClient<cometd-java-benchmark-client>",
+            "request": "launch",
+            "mainClass": "org.cometd.benchmark.client.CometDLoadClient",
+            "projectName": "cometd-java-benchmark-client"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-CometDLoadServer<cometd-java-benchmark-server>",
+            "request": "launch",
+            "mainClass": "org.cometd.benchmark.server.CometDLoadServer",
+            "projectName": "cometd-java-benchmark-server"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-CometDDemo<cometd-java-examples-embedded>",
+            "request": "launch",
+            "mainClass": "org.cometd.examples.CometDDemo",
+            "projectName": "cometd-java-examples-embedded"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ConsoleChatClient<cometd-java-examples-embedded>",
+            "request": "launch",
+            "mainClass": "org.cometd.examples.ConsoleChatClient",
+            "projectName": "cometd-java-examples-embedded"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-CometDApplication<cometd-java-examples-springboot>",
+            "request": "launch",
+            "mainClass": "org.cometd.examples.spring.boot.CometDApplication",
+            "projectName": "cometd-java-examples-springboot"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-OortDemo<cometd-java-oort>",
+            "request": "launch",
+            "mainClass": "org.cometd.oort.OortDemo",
+            "projectName": "cometd-java-oort"
+        }
+    ]
+}

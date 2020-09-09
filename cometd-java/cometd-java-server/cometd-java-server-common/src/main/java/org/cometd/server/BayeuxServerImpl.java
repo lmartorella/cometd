@@ -665,13 +665,13 @@ public class BayeuxServerImpl extends AbstractLifeCycle implements BayeuxServer,
                 ServerChannelImpl channel = getServerChannel(channelName);
                 if (channel == null) {
                     isCreationAuthorized(session, message, channelName, Promise.from(result -> {
-                        if (result instanceof Authorizer.Result.Denied) {
-                            String denyReason = ((Authorizer.Result.Denied)result).getReason();
-                            error(reply, "403:" + denyReason + ":channel_create_denied");
-                            promise.succeed(reply);
-                        } else {
+                        // if (result instanceof Authorizer.Result.Denied) {
+                        //     String denyReason = ((Authorizer.Result.Denied)result).getReason();
+                        //     error(reply, "403:" + denyReason + ":channel_create_denied");
+                        //     promise.succeed(reply);
+                        // } else {
                             handle2(session, message, (ServerChannelImpl)createChannelIfAbsent(channelName).getReference(), promise);
-                        }
+                        //}
                     }, promise::fail));
                 } else {
                     handle2(session, message, channel, promise);
@@ -770,23 +770,23 @@ public class BayeuxServerImpl extends AbstractLifeCycle implements BayeuxServer,
 
     private void isOperationAuthorized(Authorizer.Operation operation, ServerSession session, ServerMessage message, ChannelId channelId, Promise<Authorizer.Result> promise) {
         isChannelOperationAuthorized(operation, session, message, channelId, Promise.from(result -> {
-            if (result == null) {
+            //if (result == null) {
                 result = Authorizer.Result.grant();
                 if (_logger.isDebugEnabled()) {
                     _logger.debug("No authorizers, {} for channel {} {}", operation, channelId, result);
                 }
-            } else {
-                if (result.isGranted()) {
-                    if (_logger.isDebugEnabled()) {
-                        _logger.debug("No authorizer denied {} for channel {}, authorization {}", operation, channelId, result);
-                    }
-                } else if (!result.isDenied()) {
-                    result = Authorizer.Result.deny("denied_by_not_granting");
-                    if (_logger.isDebugEnabled()) {
-                        _logger.debug("No authorizer granted {} for channel {}, authorization {}", operation, channelId, result);
-                    }
-                }
-            }
+            // } else {
+            //     if (result.isGranted()) {
+            //         if (_logger.isDebugEnabled()) {
+            //             _logger.debug("No authorizer denied {} for channel {}, authorization {}", operation, channelId, result);
+            //         }
+            //     } else if (!result.isDenied()) {
+            //         result = Authorizer.Result.deny("denied_by_not_granting");
+            //         if (_logger.isDebugEnabled()) {
+            //             _logger.debug("No authorizer granted {} for channel {}, authorization {}", operation, channelId, result);
+            //         }
+            //     }
+            // }
             promise.succeed(result);
         }, promise::fail));
     }

@@ -15,15 +15,21 @@
  */
 package org.cometd.javascript;
 
+import java.util.Queue;
+
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerMessage.Mutable;
+import org.cometd.bayeux.server.ServerSession.QueueListener;
+import org.cometd.bayeux.server.ServerSession.QueueMaxedListener;
 import org.cometd.bayeux.server.ServerSession;
+import org.cometd.bayeux.server.BayeuxServer.BayeuxServerListener;
+import org.cometd.bayeux.server.ServerMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Test that in a slow network, an uninterrupted message flow due to a big subscription won't cause
- * the client to drop the connection
+ * Test that in a slow network, an uninterrupted message flow due to a big
+ * subscription won't cause the client to drop the connection
  */
 public class CometDWebSocketSlowNetworkConnectTimeoutTest extends AbstractCometDWebSocketTest {
     private final long connectTimeout = 1000;
@@ -39,34 +45,29 @@ public class CometDWebSocketSlowNetworkConnectTimeoutTest extends AbstractCometD
     private final int messageCount = 100;
 
     /**
-     * Test that a continue message flow through a slow socket won't cause connect abort
+     * Test that a continue message flow through a slow socket won't cause connect
+     * abort
+     * 
      * @throws Exception
      */
     @Test
     public void testConnectTimeoutIsCanceledOnSteadyMessageFlow() throws Exception {
         SlowOutgoingExtension extension = new SlowOutgoingExtension();
         bayeuxServer.addExtension(extension);
+        bayeuxServer.addListener(new Listener());
 
         evaluateScript("var handshakeLatch = new Latch(1);");
         Latch handshakeLatch = javaScript.get("handshakeLatch");
         evaluateScript("var connectErrLatch = new Latch(1);");
         Latch connectErrLatch = javaScript.get("connectErrLatch");
 
-        evaluateScript("cometd.configure({" +
-                "url: '" + cometdURL + "', " +
-                "connectTimeout: " + connectTimeout + ", " +
-                "logLevel: '" + getLogLevel() + "'" +
-                "});");
-        evaluateScript("cometd.addListener('/meta/handshake', function(message) {" +
-                "   if (cometd.getTransport().getType() === 'websocket' && message.successful) {" +
-                "       handshakeLatch.countDown();" +
-                "   }" +
-                "});");
-        evaluateScript("cometd.addListener('/meta/connect', function(message) {" +
-                "   if (!message.successful) {" +
-                "       connectErrLatch.countDown();" +
-                "   }" +
-                "});");
+        evaluateScript("cometd.configure({" + "url: '" + cometdURL + "', " + "connectTimeout: " + connectTimeout + ", "
+                + "logLevel: '" + getLogLevel() + "'" + "});");
+        evaluateScript("cometd.addListener('/meta/handshake', function(message) {"
+                + "   if (cometd.getTransport().getType() === 'websocket' && message.successful) {"
+                + "       handshakeLatch.countDown();" + "   }" + "});");
+        evaluateScript("cometd.addListener('/meta/connect', function(message) {" + "   if (!message.successful) {"
+                + "       connectErrLatch.countDown();" + "   }" + "});");
 
         evaluateScript("cometd.handshake()");
         Assert.assertTrue(handshakeLatch.await(2 * connectTimeout));
@@ -93,7 +94,7 @@ public class CometDWebSocketSlowNetworkConnectTimeoutTest extends AbstractCometD
 
         // Wait to be sure we're not disconnected in the middle
         Assert.assertFalse(connectErrLatch.await(2 * connectTimeout));
-        
+
         // Test disconnection
         evaluateScript("var disconnectLatch = new Latch(1);");
         Latch disconnectLatch = javaScript.get("disconnectLatch");
@@ -110,6 +111,16 @@ public class CometDWebSocketSlowNetworkConnectTimeoutTest extends AbstractCometD
             calls++;
             sleep(messageEvery);
             return BayeuxServer.Extension.super.send(from, to, message);
+        }
+    }
+
+    private class Listener implements BayeuxServerListener, QueueMaxedListener {
+
+        @Override
+        public boolean queueMaxed(ServerSession session, Queue<ServerMessage> queue, ServerSession sender,
+                ServerMessage message) {
+            // TODO Auto-generated method stub
+            return true;
         }
     }
 }

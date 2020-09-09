@@ -196,6 +196,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 });
             });
 
+            const messageCount = 100;
             for (let i = 0; i < messageCount; i++) {
                 _cometd.subscribe('/echo' + i, function(message) { });
             }

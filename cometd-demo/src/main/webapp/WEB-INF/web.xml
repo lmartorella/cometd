@@ -33,10 +33,6 @@
       <param-value>5000</param-value>
     </init-param>
     <init-param>
-      <param-name>interval</param-name>
-      <param-value>0</param-value>
-    </init-param>
-    <init-param>
       <param-name>maxInterval</param-name>
       <param-value>5000</param-value>
     </init-param>
