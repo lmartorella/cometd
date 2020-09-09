@@ -1032,6 +1032,10 @@
                     if (message.id) {
                         messageIds.push(message.id);
                         function setMessageTimeout() {
+                            var oldTimeout = context.timeouts[message.id];
+                            if (oldTimeout) {
+                                self.clearTimeout(oldTimeout);
+                            }
                             context.timeouts[message.id] = self.setTimeout(function() {
                                 _cometd._debug('Transport', self.getType(), 'timing out message', message.id, 'after', delay, 'on', context);
                                 _forceClose.call(self, context, {code: 1000, reason: 'Message Timeout'});
