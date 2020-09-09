@@ -93,9 +93,6 @@ public class WebSocketEndPoint extends Endpoint implements MessageHandler.Whole<
 
         @Override
         protected void send(ServerSession session, String data, Callback callback) {
-            if (data.length() > 10000) {
-                int i = 0;
-            }
             if (_logger.isDebugEnabled()) {
                 _logger.debug("Sending {}", data);
             }

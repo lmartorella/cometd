@@ -69,11 +69,6 @@ public class WebSocketTransport extends AbstractWebSocketTransport {
     }
 
     @Override
-    protected String generateJSON(List<Mutable> messages) {
-        return super.generateJSON(messages);
-    }
-
-    @Override
     public boolean accept(String version) {
         return _webSocketSupported;
     }
