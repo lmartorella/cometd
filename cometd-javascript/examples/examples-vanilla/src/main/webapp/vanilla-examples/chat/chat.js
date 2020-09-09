@@ -56,8 +56,8 @@ window.addEventListener('DOMContentLoaded', function() {
                 useWorkerScheduler: false,
                 logLevel: 'debug'
             });
-            _cometd.websocketEnabled = false;
-            _cometd.unregisterTransport('long-polling');
+            _cometd.websocketEnabled = true;
+            //_cometd.unregisterTransport('long-polling');
             _cometd.handshake();
 
             _hide(_id('join'));

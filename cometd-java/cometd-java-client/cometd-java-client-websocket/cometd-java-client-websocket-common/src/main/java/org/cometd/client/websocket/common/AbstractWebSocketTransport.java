@@ -68,6 +68,11 @@ public abstract class AbstractWebSocketTransport extends HttpClientTransport imp
     }
 
     @Override
+    protected String generateJSON(List<Mutable> messages) {
+        return super.generateJSON(messages);
+    }
+
+    @Override
     public void setMessageTransportListener(TransportListener listener) {
         _listener = listener;
     }

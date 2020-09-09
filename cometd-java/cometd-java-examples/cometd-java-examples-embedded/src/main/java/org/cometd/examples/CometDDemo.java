@@ -15,12 +15,22 @@
  */
 package org.cometd.examples;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
 import org.cometd.annotation.server.AnnotationCometDServlet;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerChannel;
+import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerMessage.Mutable;
 import org.cometd.bayeux.server.ServerSession;
+import org.cometd.server.BayeuxServerImpl;
 import org.cometd.server.DefaultSecurityPolicy;
+import org.cometd.server.ServerSessionImpl;
+import org.cometd.server.http.JSONTransport;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
@@ -62,16 +72,16 @@ public class CometDDemo {
         server.setHandler(contexts);
 
         ServletContextHandler context = new ServletContextHandler(contexts, "/", ServletContextHandler.SESSIONS);
-        context.setBaseResource(new ResourceCollection(
-                Resource.newResource("../../../cometd-demo/src/main/webapp/"),
+        context.setBaseResource(new ResourceCollection(Resource.newResource("../../../cometd-demo/src/main/webapp/"),
                 Resource.newResource("../../../cometd-javascript/common/src/main/webapp/"),
                 Resource.newResource("../../../cometd-javascript/jquery/src/main/webapp/"),
                 Resource.newResource("../../../cometd-javascript/examples-jquery/src/main/webapp/"),
                 Resource.newResource("../../../cometd-javascript/dojo/src/main/webapp/"),
                 Resource.newResource("../../../cometd-javascript/examples-dojo/src/main/webapp/"),
-                Resource.newResource("../../../cometd-demo/target/war/work/org.cometd.javascript/cometd-javascript-dojo/"),
-                Resource.newResource("../../../cometd-demo/target/war/work/org.cometd.javascript/cometd-javascript-jquery/"))
-        );
+                Resource.newResource(
+                        "../../../cometd-demo/target/war/work/org.cometd.javascript/cometd-javascript-dojo/"),
+                Resource.newResource(
+                        "../../../cometd-demo/target/war/work/org.cometd.javascript/cometd-javascript-jquery/")));
 
         ServletHolder dftServlet = context.addServlet(DefaultServlet.class, "/");
         dftServlet.setInitOrder(1);
@@ -92,7 +102,7 @@ public class CometDDemo {
 
         server.start();
 
-        BayeuxServer bayeux = cometdServlet.getBayeux();
+        BayeuxServerImpl bayeux = cometdServlet.getBayeux();
         bayeux.setSecurityPolicy(new DefaultSecurityPolicy());
 
         // Demo lazy messages
