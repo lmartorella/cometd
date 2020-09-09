@@ -184,7 +184,7 @@ public class ChatService {
         @Override
         public boolean send(ServerSession from, ServerSession to, Mutable message) {
             try {
-                System.console().printf("Wait...");
+                //System.console().printf("Wait...");
                 Thread.sleep(100);
                 return true;
             } catch (InterruptedException x) {
