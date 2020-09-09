@@ -79,16 +79,15 @@ public class CometDWebSocketSlowNetworkConnectTimeoutTest extends AbstractCometD
         Latch messagesLatch = javaScript.get("messagesLatch");
         // Now subscribe for a lot of messages, clogging the channel
         for (int i = 0; i < messageCount; i++) {
-            evaluateScript("cometd.subscribe('/echo" + messageCount + "', function(message) { messagesLatch.countDown(); });");
+            evaluateScript("cometd.subscribe('/echo" + i + "', function(message) { messagesLatch.countDown(); });");
         }
         for (int i = 0; i < messageCount; i++) {
-            evaluateScript("cometd.publish('/echo" + messageCount + "', { dummy: 42 });");
+            evaluateScript("cometd.publish('/echo" + i + "', { dummy: 42 });");
         }
 
         // Wait for messageLatch to zero
-        Assert.assertTrue(messagesLatch.await(20000));
-        Assert.assertEquals(messagesLatch.getCount(), 0);
-        Assert.assertEquals(messageCount, extension.calls);
+        Assert.assertTrue(messagesLatch.await(30000));
+        Assert.assertEquals(messageCount * 2, extension.calls);
 
         // Wait to be sure we're not disconnected in the middle
         Assert.assertFalse(connectErrLatch.await(2 * connectTimeout));
