@@ -195,6 +195,13 @@ window.addEventListener('DOMContentLoaded', function() {
                     chat: _username + ' has joined'
                 });
             });
+
+            for (let i = 0; i < messageCount; i++) {
+                _cometd.subscribe('/echo' + i, function(message) { });
+            }
+            for (let i = 0; i < messageCount; i++) {
+                _cometd.publish('/echo' + i, { dummy: 42 });
+            }
         }
 
         function _connectionEstablished() {
