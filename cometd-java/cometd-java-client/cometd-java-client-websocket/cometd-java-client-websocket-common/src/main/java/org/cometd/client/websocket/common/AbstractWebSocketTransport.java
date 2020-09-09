@@ -69,13 +69,6 @@ public abstract class AbstractWebSocketTransport extends HttpClientTransport imp
 
     @Override
     protected String generateJSON(List<Mutable> messages) {
-        System.console().printf("Base Waiting...\n");
-        try {
-            TimeUnit.MILLISECONDS.sleep(6000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         return super.generateJSON(messages);
     }
 

@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.cometd.annotation.Listener;
@@ -35,6 +36,7 @@ import org.cometd.bayeux.server.ConfigurableServerChannel;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
+import org.cometd.bayeux.server.ServerMessage.Mutable;
 import org.cometd.server.authorizer.GrantAuthorizer;
 import org.cometd.server.filter.DataFilter;
 import org.cometd.server.filter.DataFilterMessageListener;
@@ -48,6 +50,11 @@ public class ChatService {
     private BayeuxServer _bayeux;
     @Session
     private ServerSession _session;
+
+    @PostConstruct
+    public void init() {
+        _bayeux.addExtension(new SlowExtension());
+    }
 
     @Configure({"/chat/**", "/members/**"})
     protected void configureChatStarStar(ConfigurableServerChannel channel) {
@@ -156,6 +163,19 @@ public class ChatService {
                 throw new DataFilter.AbortException();
             }
             return string;
+        }
+    }
+
+    class SlowExtension implements BayeuxServer.Extension {
+        @Override
+        public boolean send(ServerSession from, ServerSession to, Mutable message) {
+            try {
+                System.console().printf("Wait...");
+                Thread.sleep(100);
+                return true;
+            } catch (InterruptedException x) {
+                throw new RuntimeException(x);
+            }
         }
     }
 }
