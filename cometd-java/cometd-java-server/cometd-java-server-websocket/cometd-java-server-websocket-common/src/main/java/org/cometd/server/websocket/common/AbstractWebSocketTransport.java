@@ -17,6 +17,7 @@ package org.cometd.server.websocket.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.server.AbstractServerTransport;
@@ -83,6 +84,13 @@ public abstract class AbstractWebSocketTransport extends AbstractServerTransport
     // Overridden for visibility.
     @Override
     protected String toJSON(ServerMessage message) {
+        System.console().printf("Base Waiting...\n");
+        try {
+            TimeUnit.MILLISECONDS.sleep(6000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return super.toJSON(message);
     }
 

@@ -30,7 +30,7 @@
     <servlet-class>org.cometd.annotation.server.AnnotationCometDServlet</servlet-class>
     <init-param>
       <param-name>timeout</param-name>
-      <param-value>20000</param-value>
+      <param-value>5000</param-value>
     </init-param>
     <init-param>
       <param-name>interval</param-name>
@@ -38,7 +38,7 @@
     </init-param>
     <init-param>
       <param-name>maxInterval</param-name>
-      <param-value>10000</param-value>
+      <param-value>5000</param-value>
     </init-param>
     <init-param>
       <param-name>handshakeReconnect</param-name>
