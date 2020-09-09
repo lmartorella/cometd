@@ -89,6 +89,8 @@ public class CometDWebSocketSlowNetworkConnectTimeoutTest extends AbstractCometD
         Assert.assertTrue(messagesLatch.await(30000));
         Assert.assertEquals(messageCount * 2, extension.calls);
 
+        Object msgCount = evaluateScript("cometd._messages;");
+
         // Wait to be sure we're not disconnected in the middle
         Assert.assertFalse(connectErrLatch.await(2 * connectTimeout));
         
