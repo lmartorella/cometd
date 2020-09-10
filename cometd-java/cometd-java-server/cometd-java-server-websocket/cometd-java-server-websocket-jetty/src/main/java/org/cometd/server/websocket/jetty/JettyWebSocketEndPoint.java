@@ -21,6 +21,7 @@ import org.cometd.bayeux.Promise;
 import org.cometd.bayeux.server.BayeuxContext;
 import org.cometd.bayeux.server.ServerSession;
 import org.cometd.server.websocket.common.AbstractWebSocketEndPoint;
+import org.cometd.server.websocket.common.TimeoutScheduledService;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 public class JettyWebSocketEndPoint extends AbstractWebSocketEndPoint implements WebSocketListener {
     private final Logger _logger = LoggerFactory.getLogger(getClass());
     private volatile Session _wsSession;
+    private final TimeoutScheduledService scheduler = new TimeoutScheduledService(100);
 
     public JettyWebSocketEndPoint(JettyWebSocketTransport transport, BayeuxContext context) {
         super(transport, context);
@@ -76,21 +78,30 @@ public class JettyWebSocketEndPoint extends AbstractWebSocketEndPoint implements
     @Override
     protected void send(ServerSession session, String data, Callback callback) {
         if (_logger.isDebugEnabled()) {
-            _logger.debug("Sending {}", data);
+            _logger.debug("Sending Delayed {}", data);
         }
 
-        // Async version.
-        _wsSession.getRemote().sendString(data, new WriteCallback() {
-            @Override
-            public void writeSuccess() {
-                callback.succeeded();
-            }
-
-            @Override
-            public void writeFailed(Throwable x) {
-                callback.failed(x);
-            }
-        });
+        // Simulate slow channel
+        Throwable x = scheduler.getLastFail();
+        if (x == null) {
+            callback.succeeded();
+            scheduler.schedule(() -> {
+                _wsSession.getRemote().sendString(data, new WriteCallback() {
+                    @Override
+                    public void writeSuccess() {
+                        scheduler.resetFail();
+                    }
+        
+                    @Override
+                    public void writeFailed(Throwable x) {
+                        scheduler.setFail(x);
+                    }
+                });
+                return null;
+            });
+        } else {
+            callback.failed(x);
+        }
     }
 
     @Override
@@ -98,6 +109,9 @@ public class JettyWebSocketEndPoint extends AbstractWebSocketEndPoint implements
         if (_logger.isDebugEnabled()) {
             _logger.debug("Closing {}/{}", code, reason);
         }
-        _wsSession.close(code, reason);
+        scheduler.schedule(() -> {
+            _wsSession.close(code, reason);
+            return null;
+        });
     }
 }

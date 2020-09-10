@@ -54,7 +54,7 @@ public class ChatService {
 
     @PostConstruct
     public void init() {
-        _bayeux.addExtension(new SlowExtension());
+        //_bayeux.addExtension(new SlowExtension());
         _bayeux.setSecurityPolicy(new DefaultSecurityPolicy() {
             @Override
             public boolean canCreate(BayeuxServer server, ServerSession session, String channelId,
