@@ -1031,22 +1031,30 @@
                     var message = envelope.messages[i];
                     if (message.id) {
                         messageIds.push(message.id);
-                        function setMessageTimeout() {
-                            var oldTimeout = context.timeouts[message.id];
-                            if (oldTimeout) {
-                                self.clearTimeout(oldTimeout);
-                            }
-                            context.timeouts[message.id] = self.setTimeout(function() {
+                        var timeout = { };
+                        timeout.clear = function() {
+                            timeout.timeout && self.clearTimeout(timeout.timeout);
+                            timeout.timeout = null;
+                        };
+                        timeout.rearm = function() {
+                            timeout.clear();
+                            timeout.timeout = self.setTimeout(function() {
+                                console.log("Timeout", message.id);
                                 _cometd._debug('Transport', self.getType(), 'timing out message', message.id, 'after', delay, 'on', context);
                                 _forceClose.call(self, context, {code: 1000, reason: 'Message Timeout'});
                             }, delay);
                         };
-                        setMessageTimeout();
-                        if (metaConnect) {
-                            context.metaConnectMessageId = message.id;
-                            // Expose reset function to delay the timeout
-                            context.metaConnectTimeoutReset = setMessageTimeout;
-                        }
+                        context.timeouts[message.id] = timeout;
+                        timeout.rearm();
+                        // if (metaConnect) {
+                        //     context.metaConnectMessageId = message.id;
+                        //     // Expose reset function to delay the timeout
+                        //     context.metaConnectTimeoutReset = function() {
+                        //         console.log("Rearmed", message.id);
+                        //         setMessageTimeout();
+                        //     }
+                        //     console.log("Started", message.id);
+                        // }
                     }
                 })();
             }
@@ -1067,9 +1075,7 @@
                 if (context === null) {
                     context = _connecting || {
                         envelopes: {},
-                        timeouts: {},
-                        metaConnectMessageId: null,
-                        metaConnectTimeoutReset: null
+                        timeouts: {}
                     };
                     _storeEnvelope.call(this, context, envelope, metaConnect);
                     _websocketConnect.call(this, context);
@@ -1110,10 +1116,16 @@
             this._debug('Transport', this.getType(), 'received websocket message', wsMessage, context);
 
             _cometd._messages = (_cometd._messages || 0) + 1;
-            var metaConnectReset = context.metaConnectTimeoutReset;
-            if (metaConnectReset) {
-                metaConnectReset();
+            for (var id in context.timeouts) {
+                if (context.timeouts.hasOwnProperty(id)) {
+                    context.timeouts[id].rearm();
+                }
             }
+
+            // var metaConnectReset = context.metaConnectTimeoutReset;
+            // if (metaConnectReset) {
+            //     metaConnectReset();
+            // }
 
             var close = false;
             var messages = this.convertToMessages(wsMessage.data);
@@ -1130,12 +1142,13 @@
 
                         var timeout = context.timeouts[message.id];
                         if (timeout) {
-                            this.clearTimeout(timeout);
+                            timeout.clear();
                             delete context.timeouts[message.id];
-                            if (message.id == context.metaConnectMessageId) {
-                                context.metaConnectTimeoutReset = null;
-                                context.metaConnectMessageId = null;
-                            }
+                            // if (message.id == context.metaConnectMessageId) {
+                            //     context.metaConnectTimeoutReset = null;
+                            //     context.metaConnectMessageId = null;
+                            //     console.log("Cleared", message.id);
+                            // }
                             this._debug('Transport', this.getType(), 'removed timeout for message', message.id, ', timeouts', context.timeouts);
                         }
                     }
@@ -1199,11 +1212,11 @@
             context.timeouts = {};
             for (var id in timeouts) {
                 if (timeouts.hasOwnProperty(id)) {
-                    this.clearTimeout(timeouts[id]);
+                    timeouts[id].clear();
                 }
             }
-            context.metaConnectMessageId = null;
-            context.metaConnectTimeoutReset = null;
+            // context.metaConnectMessageId = null;
+            // context.metaConnectTimeoutReset = null;
 
             var envelopes = context.envelopes;
             context.envelopes = {};
