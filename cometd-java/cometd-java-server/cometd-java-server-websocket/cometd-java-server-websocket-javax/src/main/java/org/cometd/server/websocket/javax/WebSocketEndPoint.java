@@ -100,25 +100,19 @@ public class WebSocketEndPoint extends Endpoint implements MessageHandler.Whole<
             }
 
             // Simulate slow channel
-            final Throwable x = scheduler.getLastFail();
-            if (x == null) {
-                callback.succeeded();
-                scheduler.schedule(() -> {
-                    _wsSession.getAsyncRemote().sendText(data, 
-                        result -> {
-                            final Throwable failure = result.getException();
-                            if (failure == null) {
-                                scheduler.resetFail();
-                            } else {
-                                scheduler.setFail(failure);
-                            }
+            scheduler.schedule(() -> {
+                _wsSession.getAsyncRemote().sendText(data, 
+                    result -> {
+                        final Throwable failure = result.getException();
+                        if (failure == null) {
+                            callback.succeeded();
+                        } else {
+                            callback.failed(failure);
                         }
-                    );
-                    return null;
-                });
-            } else {
-                callback.failed(x);
-            }
+                    }
+                );
+                return null;
+            });
         }
 
         @Override

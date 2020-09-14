@@ -82,26 +82,20 @@ public class JettyWebSocketEndPoint extends AbstractWebSocketEndPoint implements
         }
 
         // Simulate slow channel
-        Throwable x = scheduler.getLastFail();
-        if (x == null) {
-            callback.succeeded();
-            scheduler.schedule(() -> {
-                _wsSession.getRemote().sendString(data, new WriteCallback() {
-                    @Override
-                    public void writeSuccess() {
-                        scheduler.resetFail();
-                    }
-        
-                    @Override
-                    public void writeFailed(Throwable x) {
-                        scheduler.setFail(x);
-                    }
-                });
-                return null;
+        scheduler.schedule(() -> {
+            _wsSession.getRemote().sendString(data, new WriteCallback() {
+                @Override
+                public void writeSuccess() {
+                    callback.succeeded();
+                }
+    
+                @Override
+                public void writeFailed(Throwable x) {
+                    callback.failed(x);
+                }
             });
-        } else {
-            callback.failed(x);
-        }
+            return null;
+        });
     }
 
     @Override
