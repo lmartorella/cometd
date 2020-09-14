@@ -6,7 +6,7 @@
   "main": "dist/cometd-all.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lmartorella/cometd.git"
+    "url": "git+https://github.com/iongroup/cometd.git"
   },
   "scripts": {
     "build": "grunt build"
